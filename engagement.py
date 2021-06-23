@@ -2,6 +2,7 @@ import io
 import itertools
 import math
 import sys
+import json
 
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance
 
@@ -24,11 +25,13 @@ def _flatten(l):
     return list(itertools.chain(*[[x] if type(x) not in [list] else x for x in l]))
 
 
-import json
+# username as first arg
 
-chunk = json.loads(open(sys.argv[-1]).read())
+input_username = sender = sys.argv[-2]
 
-username = sender = sys.argv[-2]
+# json file path as last argument
+
+chunk = [el for el in json.loads(open(sys.argv[-1]).read()) if el]
 
 sent = [t for t in chunk if t.get("username") == sender]
 resp = [t for t in chunk if t.get("username") != sender]
@@ -65,6 +68,8 @@ import urllib.request
 total = sum([ct for (ct, name) in top40])
 balanced = [{"datum": ct / total, "id": name} for (ct, name) in top40]
 balanced = sorted(balanced, key=lambda x: x.get("datum"))
+
+# some day this will be the normal public ARGH
 host = "localhost:8080"
 import circlify
 
@@ -77,7 +82,6 @@ metadata = json.loads(
 )
 print(accounts)
 print(top_liked)
- love to the sceneprint(rings)
 user_pics = {m.get("screen_name"): m.get("profile_image_url_https") for m in metadata}
 user_pics[sender] = json.loads(
     urllib.request.urlopen(f"http://{host}/tw/users?usernames=" + sender).read()
@@ -112,7 +116,6 @@ for circle in rings:
     if not circle.ex:
         circle.ex = {"id": sender}
     username = circle.ex.get("id").strip("@")
-    print(circle, username)
     d = math.floor(circle.r * 800)
     if username in user_imgs:
         img = user_imgs[username].resize((d, d))
@@ -125,4 +128,4 @@ for circle in rings:
             img,
         )
 
-base.save(f"{username}.png")
+base.save(f"{input_username}.png")
